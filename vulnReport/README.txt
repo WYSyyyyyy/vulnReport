@@ -12,4 +12,9 @@
 1、googletranslater.py  修改为新版URL，翻译更加智能；
 2、main.py 加入“是否翻译 消息级别漏洞”选项；取消使用win32 word application，改用python-docx、docxcompose库，速度提升；
 3、vuln_awvs.py 修正翻译错误问题；
-4、vuln_nessus.py 修正写入和翻译错误问题；加入HTML格式整理；
+4、vuln_nessus.py 修正写入和翻译错误问题；加入HTML格式整理。
+
+
+#20191230更新
+1、删除了requirements中多余的库（mailmerge），小白可以按照命令一键安装了；
+2、更改bat文件中的python3为python，小白可以一键启动了……
