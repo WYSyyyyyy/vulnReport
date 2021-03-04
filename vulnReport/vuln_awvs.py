@@ -12,9 +12,12 @@ import googletranslater
 def zhengli(fileName, info_flag):
     # 'r'时出现"UnicodeDecodeError: 'gbk' codec can't decode byte 0x80 in position 205: illegal multibyte sequence"
     #错误，方法一：r 后加encoding='utf-8';法二，'rb'
+    #20200116 使用法一出现“UnicodeDecodeError: 'utf-8' codec can't decode byte 0x80 in position 0: invalid start byte，
+    #故用encoding='unicode_escape' or encoding='gbk'
     #打开文件
     # print(info_flag)
-    with open(fileName, 'r', encoding='utf-8') as f:
+    with open(fileName, 'r', encoding='unicode_escape') as f:
+    # with open(fileName, 'rb') as f:
         text = ''.join(f.readlines())
         text1 = text.replace('<td colspan="16" class="s37">Acunetix Website Audit</td>', '')
         text2 = text1.replace('<td class="s37" colspan="16">Acunetix Website Audit</td>', '')

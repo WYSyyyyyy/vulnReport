@@ -82,8 +82,10 @@ def zhengli_html(srcFile, info_flag):
             for row in result1:
                 # new_list[j][1] = row[2]
                 # new_list[j][4] = row[4]
-                i[1] = row[2]
-                i[4] = row[4]
+                i[1] = row[3]
+                i[4] = row[5]
+            print('这个是从数据库中取出来的值')
+            print(i)
         else:
             #翻译并写入漏洞库
             # new_list[j][1] = googletranslater.googleTrans(i[1])
@@ -94,7 +96,7 @@ def zhengli_html(srcFile, info_flag):
             print(tmp_en_name)
             print('*************\n')
             print(i[1])
-            conn.execute("insert into nessus values(?, ?, ?, ?, ?)", (int(i[0]), tmp_en_name, i[1], i[2], i[4]))
+            conn.execute("insert into nessus(pluginID, vuln_en, vuln_zh, risk, solution) values(?, ?, ?, ?, ?)", (int(i[0]), tmp_en_name, i[1], i[2], i[4]))
 
 
         j = j + 1
@@ -189,7 +191,7 @@ def read_csv(csv_name, info_flag):
 def read_html(html_name, info_flag):
     pluginID, name, host, risk, solution = '', '', '', '', ''
     # nessus_html_lists = []
-    mylist, risk_high, risk_medium, risk_low = [],[],[],[]
+    mylist, risk_high, risk_medium, risk_low, risk_info = [],[],[],[],[]
     html = etree.parse(html_name, etree.HTMLParser())
 
     #把pluginID与漏洞名称分离的正则
@@ -202,7 +204,7 @@ def read_html(html_name, info_flag):
             host = vuln.text
         #漏洞
         elif "this.style.cursor" in str(etree.tostring(vuln)):
-            result = htm_parse(vuln, info_flag)
+            result = htm_parse(vuln)
             #返回的是((id,name),high)的形式
             (tmp, risk) = result
             #非空
@@ -211,8 +213,14 @@ def read_html(html_name, info_flag):
                 (pluginID, name) = p_n[0]
         #找到漏洞下的container 找到漏洞细节及修复方案
         elif "container" in str(etree.tostring(vuln)):
-            solution_div_list = vuln.xpath('./div[8]')
-            solution = solution_div_list[0].text
+
+            #这个是存在see also的情况
+            # solution_div_list = vuln.xpath('./div[8]')
+            # solution = solution_div_list[0].text
+            if vuln.xpath('./div[5]')[0].text == 'Solution':
+                solution = vuln.xpath('./div[6]')[0].text
+            elif vuln.xpath('./div[7]')[0].text == 'Solution':
+                solution = vuln.xpath('./div[8]')[0].text
 
             if risk == '高':
                 risk_high.append([pluginID, name, risk, host, solution])
@@ -220,18 +228,23 @@ def read_html(html_name, info_flag):
                 risk_medium.append([pluginID, name, risk, host, solution])
             elif risk == '低':
                 risk_low.append([pluginID, name, risk, host, solution])
-            else:
-                pass
+            elif risk == '消息':
+                risk_info.append([pluginID, name, '低', host, '该漏洞为信息漏洞，暂无修复建议。'])
         else:
             pass
 
     risk_high.sort(key=takeName)
     risk_medium.sort(key=takeName)
     risk_low.sort(key=takeName)
+    risk_info.sort(key=takeName)
 
     mylist.extend(risk_high)
     mylist.extend(risk_medium)
     mylist.extend(risk_low)
+    if not info_flag:
+        pass
+    else:
+        mylist.extend(risk_info)
     
     #合并IP
     new_list = hebing(mylist)
@@ -239,7 +252,7 @@ def read_html(html_name, info_flag):
     return new_list
 
 
-def htm_parse(l, info_flag): 
+def htm_parse(l): 
     info, risk = '',''     
     #危急级别
     if '#d43f3a' in str(etree.tostring(l)):
@@ -256,10 +269,10 @@ def htm_parse(l, info_flag):
     elif '#3fae49' in str(etree.tostring(l)):
         (info, risk) = (l.text, "低")
         # info=l.text + " - 低"          
-    # elif '#0071b9' in str(etree.tostring(l)):
+    elif '#0071b9' in str(etree.tostring(l)):
     #消息或None级别
-    elif '#0071b9' in str(etree.tostring(l)) and info_flag:
-        (info, risk) = (l.text, "低")
+    # elif '#0071b9' in str(etree.tostring(l)) and info_flag:
+        (info, risk) = (l.text, "消息")
         # info=l.text + " - 低"
     
     

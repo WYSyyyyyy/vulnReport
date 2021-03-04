@@ -55,19 +55,28 @@ def buildUrl(text,tk):
     #新版URL，更加智能一些，把client=webapp即可
     baseUrl = 'https://translate.google.cn/translate_a/single?client=webapp&sl=en&tl=zh-CN&hl=zh-CN&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&ie=UTF-8&oe=UTF-8&source=bh&otf=1&ssel=0&tsel=0&kc=1&'
     baseUrl += 'tk='+str(tk)+'&'
-    baseUrl += 'q='+text
+    baseUrl += 'q='+str(text)
     return baseUrl
 js = Py4Js()
+# def googleTrans(text):
+#     try:
+#         #get url
+#         url = buildUrl(text,js.getTk(text))
+#         #responce
+#         r = requests.get(url)
+#         #返回json格式的数据
+#         data = json.loads(r.text)
+#         result = data[0][0][0]
+#         return result
+#     except Exception as e:
+#         print("出错了")
+#         print(e)
+
 def googleTrans(text):
-    try:
-        #get url
-        url = buildUrl(text,js.getTk(text))
-        #responce
-        r = requests.get(url)
-        #返回json格式的数据
-        data = json.loads(r.text)
-        result = data[0][0][0]
-        return result
-    except Exception as e:
-        print("出错了")
-        print(e)
+    url = buildUrl(text,js.getTk(text))
+    #responce
+    r = requests.get(url)
+    #返回json格式的数据
+    data = json.loads(r.text)
+    result = data[0][0][0]
+    return result
