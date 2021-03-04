@@ -7,3 +7,12 @@ nessus
 其他的差不多是一样。有些少了翻译过程而已。
 
 仅供个人学习使用。
+
+一、安装说明：
+
+	1、安装python 3.7.5，安装python时注意把“python添加到path” 选项勾上，装好之后在cmd中输入：python 后显示 python3.7.5。（之前有装python2.7注意并存事项）
+	2、cmd进入vulnReport目录，输入 pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+	3、点击“漏洞整理.bat”后启动。（如果python默认是python2.7，则bat中需要更改为python3命令。如：python3 main.py）
+	4、如有使用上的问题，请联系3115211094@qq.com。
+
+
