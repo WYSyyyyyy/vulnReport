@@ -1,5 +1,5 @@
 # vulnReport
-包括 Nessus、天境主机漏洞扫描6.0、APPscan 9.0、awvs10.5等漏洞报告的整理，从整理翻译写入word模板或Excel（写入Excel代码没有，但这个比word模板简单很多，网上搜一下改动一下代码即可）一条龙服务。
+包括 Nessus、天境主机漏洞扫描6.0、APPscan 9.0、awvs10.5、burpsuite等漏洞报告的整理，从整理翻译写入word模板或Excel（写入Excel代码没有，但这个比word模板简单很多，网上搜一下改动一下代码即可）一条龙服务。
 
 nessus
   支持csv及HTML格式的报告漏洞整理，漏洞提取->漏洞主机合并->查找漏洞库或翻译（翻译后写入漏洞）->写入word漏洞模板->输出漏洞文档
