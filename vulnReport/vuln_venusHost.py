@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup as bs
 import re
 
 def zhengli(fileName,info_flag):
-    print(info_flag)
+    # print(info_flag)
     html = ''
     vuln_hosts, vuln_solution = '', ''
     #(?isu)意思是匹配后面的中文
@@ -32,10 +32,13 @@ def zhengli(fileName,info_flag):
             #根据item得到下标号，为了正确显示某些低危漏洞没有修补建议，写成参考网址的情况
             for i, item in enumerate(tmp_list):
                 if '存在主机' == item:
-                    vuln_hosts = tmp_list[i+1]
+                    # vuln_hosts = tmp_list[i+1].replace(' ', '、')
+                    #将主机IP中多余的空格替换成'、',并除去 <br/>标签
+                    vuln_hosts = re.sub('\\s+', '、', tmp_list[i+1].replace('<br/>', ''))
                 elif '修补建议' == item:
                     if tmp_list[i+1] != '参考网址':
-                        vuln_solution = tmp_list[i+1]
+                        #除去<br/>标签，得到整改建议
+                        vuln_solution = tmp_list[i+1].replace('<br/>', '')
                     else:
                         vuln_solution = ''
                 else:

@@ -1,9 +1,10 @@
 #-*-coding:utf-8 -*-
 import sqlite3
-import googletranslater
+# import googletranslater
 import pandas as pd
 from lxml import etree
 import re
+import baiduTranslater
 
 
 #翻译程序主入口
@@ -34,9 +35,11 @@ def zhengli_csv(srcFile, info_flag):
                 new_list[j][4] = row[4]
         else:
             #翻译并写入漏洞库
-            new_list[j][1] = googletranslater.googleTrans(i[1])
-            new_list[j][4] = googletranslater.googleTrans(i[4])
+            new_list[j][1] = baiduTranslater.baiduTrans(i[1])
+            new_list[j][4] = baiduTranslater.baiduTrans(i[4])
             conn.execute("insert into nessus values(?, ?, ?, ?, ?)", (int(i[0]), i[1], new_list[j][1], i[2], new_list[j][4]))
+            # print(new_list[j][1])
+            # print(type(new_list[j][4]))
 
 
         j = j + 1
@@ -45,13 +48,14 @@ def zhengli_csv(srcFile, info_flag):
     #write2docx中只有4个字段，无pluginID，所以这里要去掉
     nessus_list = []
     for x in new_list:
-        x[1] = x[1].replace("\n", "")
-        x[4] = x[4].replace("\n", "")
+        # x[1] = x[1].replace("\n", "")
+        # x[4] = x[4].replace("\n", "")
         nessus_list.append([x[1], x[2], x[3], x[4]])
 
     # write2csv(new_list, destFile)
     #提交插入
     conn.commit()
+    # print(nessus_list)
     return ("主机IP", nessus_list)
 
 def zhengli_html(srcFile, info_flag):
@@ -79,19 +83,21 @@ def zhengli_html(srcFile, info_flag):
             for row in result1:
                 # new_list[j][1] = row[2]
                 # new_list[j][4] = row[4]
-                i[1] = row[2]
-                i[4] = row[4]
+                i[1] = row[3]
+                i[4] = row[5]
+            print('这个是从数据库中取出来的值')
+            print(i)
         else:
             #翻译并写入漏洞库
             # new_list[j][1] = googletranslater.googleTrans(i[1])
             # new_list[j][4] = googletranslater.googleTrans(i[4])
             # conn.execute("insert into nessus values(?, ?, ?, ?, ?)", (int(i[0]), i[1], new_list[j][1], i[2], new_list[j][4]))
-            i[1] = googletranslater.googleTrans(i[1])
-            i[4] = googletranslater.googleTrans(i[4])
+            i[1] = baiduTranslater.baiduTrans(i[1])
+            i[4] = baiduTranslater.baiduTrans(i[4])
             print(tmp_en_name)
             print('*************\n')
             print(i[1])
-            conn.execute("insert into nessus values(?, ?, ?, ?, ?)", (int(i[0]), tmp_en_name, i[1], i[2], i[4]))
+            conn.execute("insert into nessus(pluginID, vuln_en, vuln_zh, risk, solution) values(?, ?, ?, ?, ?)", (int(i[0]), tmp_en_name, i[1], i[2], i[4]))
 
 
         j = j + 1
@@ -122,7 +128,6 @@ def read_csv(csv_name, info_flag):
     data_host = pd.read_csv(filepath_or_buffer=csv_name,engine='python')["Host"].values
     data_solution = pd.read_csv(filepath_or_buffer=csv_name,engine='python')["Solution"].values
 
-
     #设置列表存储读取到的值
     #这里的思路和vuln_appscan是一样的。
     mylist, risk_high, risk_medium, risk_low = [],[],[],[]
@@ -135,9 +140,19 @@ def read_csv(csv_name, info_flag):
         #不读取none、low级别
         # if data_risk[i] == "None" or data_risk[i] == "Info" :
         #     pass
-        if data_risk[i] == "None" or data_risk[i] == "Info" and info_flag :
+        # print(data_risk[i])
+        if data_risk[i] == "None" and info_flag :
             # print(str(i)+data_risk[i])
-            risk_low.append([data_pluginID[i], data_name[i], "低", data_host[i], data_solution[i]])
+            if data_solution[i] == "nan":
+                risk_low.append([data_pluginID[i], data_name[i], "低", data_host[i], "无"])
+            else:
+                risk_low.append([data_pluginID[i], data_name[i], "低", data_host[i], str(data_solution[i])])
+        elif data_risk[i] == "Info" and info_flag :
+            # print(str(i)+data_risk[i])
+            if data_solution[i] == "nan":
+                risk_low.append([data_pluginID[i], data_name[i], "低", data_host[i], "无"])
+            else:
+                risk_low.append([data_pluginID[i], data_name[i], "低", data_host[i], str(data_solution[i])])
         #读取紧急级别
         elif data_risk[i] == "Critical" or data_risk[i] == "High":
             #risk_high.append([data_pluginID[i], data_name[i], data_risk[i], data_host[i], data_solution[i]])
@@ -150,7 +165,7 @@ def read_csv(csv_name, info_flag):
             risk_medium.append([data_pluginID[i], data_name[i], "中", data_host[i], data_solution[i]])
 
         # 读取低级别
-        else:
+        elif data_risk[i] == "Low":
             #risk_low.append([data_pluginID[i], data_name[i], data_risk[i], data_host[i], data_solution[i]])
             risk_low.append([data_pluginID[i], data_name[i], "低", data_host[i], data_solution[i]])
     
@@ -177,7 +192,7 @@ def read_csv(csv_name, info_flag):
 def read_html(html_name, info_flag):
     pluginID, name, host, risk, solution = '', '', '', '', ''
     # nessus_html_lists = []
-    mylist, risk_high, risk_medium, risk_low = [],[],[],[]
+    mylist, risk_high, risk_medium, risk_low, risk_info = [],[],[],[],[]
     html = etree.parse(html_name, etree.HTMLParser())
 
     #把pluginID与漏洞名称分离的正则
@@ -190,7 +205,7 @@ def read_html(html_name, info_flag):
             host = vuln.text
         #漏洞
         elif "this.style.cursor" in str(etree.tostring(vuln)):
-            result = htm_parse(vuln, info_flag)
+            result = htm_parse(vuln)
             #返回的是((id,name),high)的形式
             (tmp, risk) = result
             #非空
@@ -199,8 +214,14 @@ def read_html(html_name, info_flag):
                 (pluginID, name) = p_n[0]
         #找到漏洞下的container 找到漏洞细节及修复方案
         elif "container" in str(etree.tostring(vuln)):
-            solution_div_list = vuln.xpath('./div[8]')
-            solution = solution_div_list[0].text
+
+            #这个是存在see also的情况
+            # solution_div_list = vuln.xpath('./div[8]')
+            # solution = solution_div_list[0].text
+            if vuln.xpath('./div[5]')[0].text == 'Solution':
+                solution = vuln.xpath('./div[6]')[0].text
+            elif vuln.xpath('./div[7]')[0].text == 'Solution':
+                solution = vuln.xpath('./div[8]')[0].text
 
             if risk == '高':
                 risk_high.append([pluginID, name, risk, host, solution])
@@ -208,18 +229,23 @@ def read_html(html_name, info_flag):
                 risk_medium.append([pluginID, name, risk, host, solution])
             elif risk == '低':
                 risk_low.append([pluginID, name, risk, host, solution])
-            else:
-                pass
+            elif risk == '消息':
+                risk_info.append([pluginID, name, '低', host, '该漏洞为信息漏洞，暂无修复建议。'])
         else:
             pass
 
     risk_high.sort(key=takeName)
     risk_medium.sort(key=takeName)
     risk_low.sort(key=takeName)
+    risk_info.sort(key=takeName)
 
     mylist.extend(risk_high)
     mylist.extend(risk_medium)
     mylist.extend(risk_low)
+    if not info_flag:
+        pass
+    else:
+        mylist.extend(risk_info)
     
     #合并IP
     new_list = hebing(mylist)
@@ -227,7 +253,7 @@ def read_html(html_name, info_flag):
     return new_list
 
 
-def htm_parse(l, info_flag): 
+def htm_parse(l): 
     info, risk = '',''     
     #危急级别
     if '#d43f3a' in str(etree.tostring(l)):
@@ -244,10 +270,10 @@ def htm_parse(l, info_flag):
     elif '#3fae49' in str(etree.tostring(l)):
         (info, risk) = (l.text, "低")
         # info=l.text + " - 低"          
-    # elif '#0071b9' in str(etree.tostring(l)):
+    elif '#0071b9' in str(etree.tostring(l)):
     #消息或None级别
-    elif '#0071b9' in str(etree.tostring(l)) and info_flag:
-        (info, risk) = (l.text, "低")
+    # elif '#0071b9' in str(etree.tostring(l)) and info_flag:
+        (info, risk) = (l.text, "消息")
         # info=l.text + " - 低"
     
     
