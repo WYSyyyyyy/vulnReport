@@ -1,7 +1,8 @@
 # -*- coding:utf8 -*-
 
 from bs4 import BeautifulSoup as bs
-import googletranslater
+# import googletranslater
+import baiduTranslater
 
 def zhengli(fileName, info_flag):
     
@@ -82,8 +83,10 @@ def zhengli(fileName, info_flag):
             
         
         for x in vulnBurp:
-            x[0] = googletranslater.googleTrans(x[0])
-            x[3] = googletranslater.googleTrans(x[3])
+            # x[0] = googletranslater.googleTrans(x[0])
+            # x[3] = googletranslater.googleTrans(x[3])
+            x[0] = baiduTranslater.baiduTrans(x[0])
+            x[3] = baiduTranslater.baiduTrans(x[3])
         
         return vulnBurp
         

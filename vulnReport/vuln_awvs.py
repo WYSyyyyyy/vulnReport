@@ -2,7 +2,8 @@
  
 from bs4 import BeautifulSoup as bs
 import re
-import googletranslater
+# import googletranslater
+import baiduTranslater
 
 
 
@@ -157,8 +158,10 @@ def zhengli(fileName, info_flag):
 
         #翻译
         for x in new_list:
-            x[0] = googletranslater.googleTrans(x[0])
-            x[3] = googletranslater.googleTrans(x[3])
+            # x[0] = googletranslater.googleTrans(x[0])
+            # x[3] = googletranslater.googleTrans(x[3])
+            x[0] = baiduTranslater.baiduTrans(x[0])
+            x[3] = baiduTranslater.baiduTrans(x[3])
 
         return ("URL地址", new_list)
 

@@ -1,6 +1,7 @@
 #-*-coding:utf-8 -*-
 import sqlite3
-import googletranslater
+# import googletranslater
+import baiduTranslater
 import pandas as pd
 from lxml import etree
 import re
@@ -34,8 +35,10 @@ def zhengli_csv(srcFile, info_flag):
                 new_list[j][4] = row[4]
         else:
             #翻译并写入漏洞库
-            new_list[j][1] = googletranslater.googleTrans(i[1])
-            new_list[j][4] = googletranslater.googleTrans(i[4])
+            # new_list[j][1] = googletranslater.googleTrans(i[1])
+            # new_list[j][4] = googletranslater.googleTrans(i[4])
+            new_list[j][1] = baiduTranslater.baiduTrans(i[1])
+            new_list[j][4] = baiduTranslater.baiduTrans(i[4])
             conn.execute("insert into nessus values(?, ?, ?, ?, ?)", (int(i[0]), i[1], new_list[j][1], i[2], new_list[j][4]))
             # print(new_list[j][1])
             # print(type(new_list[j][4]))
@@ -91,8 +94,10 @@ def zhengli_html(srcFile, info_flag):
             # new_list[j][1] = googletranslater.googleTrans(i[1])
             # new_list[j][4] = googletranslater.googleTrans(i[4])
             # conn.execute("insert into nessus values(?, ?, ?, ?, ?)", (int(i[0]), i[1], new_list[j][1], i[2], new_list[j][4]))
-            i[1] = googletranslater.googleTrans(i[1])
-            i[4] = googletranslater.googleTrans(i[4])
+            # i[1] = googletranslater.googleTrans(i[1])
+            # i[4] = googletranslater.googleTrans(i[4])
+            i[1] = baiduTranslater.baiduTrans(i[1])
+            i[4] = baiduTranslater.baiduTrans(i[4])
             print(tmp_en_name)
             print('*************\n')
             print(i[1])

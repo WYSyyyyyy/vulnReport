@@ -4,7 +4,8 @@ import tkinter as tk
 import tkinter.filedialog as tkf
 import os
 import time
-import googletranslater
+# import googletranslater
+# import baiduTranslater
 import vuln_nessus
 import vuln_venusHost
 import vuln_appcan
@@ -418,10 +419,10 @@ if __name__ == "__main__":
      #Burp Suite
     lb5 = tk.Label(root, text='BurpSuite的HTML文件：')
     lb5.grid(row=4, column=0)
-    text4 = tk.Text(root, width=80, height=1)
+    text5 = tk.Text(root, width=80, height=1)
     
-    text4.grid(row=4, column=1)
-    text4.mark_set('here','1.0')
+    text5.grid(row=4, column=1)
+    text5.mark_set('here','1.0')
     b7 = tk.Button(root, text='请选择文件', command=selectFile4)
     b8 = tk.Button(root, text='整理', command=zhengli_burp)
     b7.grid(row=4, column=2)
