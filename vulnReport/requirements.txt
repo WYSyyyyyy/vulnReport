@@ -1,6 +1,6 @@
 PyExecJS==1.5.1
 docx_mailmerge==0.4.0
-pywin32==225
+pywin32==301
 requests==2.19.1
 pandas==0.23.3
 beautifulsoup4==4.8.1
